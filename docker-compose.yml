@@ -1,0 +1,39 @@
+services:
+  oracle:
+    image: gvenzl/oracle-free:23-slim-faststart
+    container_name: oracle-db
+    restart: unless-stopped
+    environment:
+      - ORACLE_PASSWORD=${ORACLE_PASSWORD}   # valores reales en .env (no se sube a git)
+      - APP_USER=${APP_USER}
+      - APP_USER_PASSWORD=${APP_USER_PASSWORD}
+    ports:
+      - '1521:1521'
+    volumes:
+      - oracle_data:/opt/oracle/oradata
+      # scripts .sql/.sh aqui se ejecutan UNA sola vez, la primera vez que se crea la DB
+      - ./src/main/resources/db/init:/container-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD", "healthcheck.sh"]
+      interval: 10s
+      timeout: 5s
+      retries: 15
+      start_period: 60s   # dale tiempo, Oracle tarda en arrancar la primera vez
+
+  app:
+    build: .
+    container_name: telco-orders-app
+    restart: on-failure
+    depends_on:
+      oracle:
+        condition: service_healthy   # el app NO arranca hasta que Oracle esté listo de verdad
+    ports:
+      - '8080:8080'
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATASOURCE_URL=jdbc:oracle:thin:@oracle:1521/FREEPDB1
+      - SPRING_DATASOURCE_USERNAME=${APP_USER}
+      - SPRING_DATASOURCE_PASSWORD=${APP_USER_PASSWORD}
+
+volumes:
+  oracle_data:
