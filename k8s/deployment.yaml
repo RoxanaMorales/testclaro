@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: testclaro-app
+  namespace: testclaro
+  labels:
+    app: testclaro-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: testclaro-app
+  template:
+    metadata:
+      labels:
+        app: testclaro-app
+    spec:
+      # necesario porque el paquete en ghcr.io queda privado por defecto
+      # (secret creado a mano, ver instrucciones -- no se comitea)
+      imagePullSecrets:
+        - name: ghcr-credentials
+      containers:
+        - name: testclaro-app
+          image: ghcr.io/roxanamorales/testclaro:latest
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: testclaro-config
+          env:
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: oracle-credentials
+                  key: username
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: oracle-credentials
+                  key: password
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 20
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 20

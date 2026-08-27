@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: testclaro-config
+  namespace: testclaro
+data:
+  SPRING_PROFILES_ACTIVE: "docker"
+  # host.k3d.internal es el nombre especial que k3d le da al host (tu PC)
+  # visto desde adentro del cluster -- asi el pod llega a tu Oracle de docker-compose
+  SPRING_DATASOURCE_URL: "jdbc:oracle:thin:@host.k3d.internal:1521/FREEPDB1"
