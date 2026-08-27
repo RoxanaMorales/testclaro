@@ -53,17 +53,18 @@ CREATE TABLE orden (
 );
 
 CREATE TABLE historial (
-                       id_registro       NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-                       fk_orden          NUMBER NOT NULL,
-                       fk_estado_anterior    NUMBER,
-                       fk_estado_nuevo         NUMBER,
-                       date_created      TIMESTAMP DEFAULT SYSTIMESTAMP NOT NULL,
+    id_registro       NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    fk_orden          NUMBER NOT NULL,
+    fk_estado_anterior    NUMBER,
+    fk_estado_nuevo         NUMBER,
+    date_created      TIMESTAMP DEFAULT SYSTIMESTAMP NOT NULL,
                        date_update      NOT NULL,
                        CONSTRAINT fk_historial_orden       FOREIGN KEY (fk_orden)        REFERENCES estado (id_orden),
                        CONSTRAINT fk_historial_estado_anterior        FOREIGN KEY (fk_estado_anterior)        REFERENCES estado (id_estado),
                        CONSTRAINT fk_historial_estado_nuevo       FOREIGN KEY (fk_estado_nuevo)       REFERENCES cliente (id_estado),
 );
 
+#COMENTARIO
 
 INSERT INTO estado (nombre_estado) VALUES ('CREATED');
 INSERT INTO estado (nombre_estado) VALUES ('VALIDATED');
