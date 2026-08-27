@@ -43,6 +43,21 @@ public class OrdenController {
         return repository.save(orden);
     }
 
+    // Igual que en el POST: manda los objetos con solo el id, ej.
+    // { "estado": {"idEstado": 3}, "tecnico": {"idTecnico": 1}, ... }
+    @PutMapping("/{id}")
+    public ResponseEntity<Orden> update(@PathVariable Long id, @RequestBody Orden incoming) {
+        return repository.findById(id)
+                .map(existing -> {
+                    existing.setEstado(incoming.getEstado());
+                    existing.setCliente(incoming.getCliente());
+                    existing.setTecnico(incoming.getTecnico());
+                    existing.setTipoServicio(incoming.getTipoServicio());
+                    return ResponseEntity.ok(repository.save(existing));
+                })
+                .orElse(ResponseEntity.notFound().build());
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         if (!repository.existsById(id)) {
