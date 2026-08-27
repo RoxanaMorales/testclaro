@@ -52,12 +52,25 @@ CREATE TABLE orden (
     CONSTRAINT fk_orden_tiposervicio  FOREIGN KEY (fk_tipo_servicio) REFERENCES tipo_servicio (id_tipo_ser)
 );
 
--- Datos minimos de prueba, para poder probar los endpoints de una vez.
-INSERT INTO estado (nombre_estado) VALUES ('ACTIVO');
-INSERT INTO estado (nombre_estado) VALUES ('PENDIENTE');
-INSERT INTO estado (nombre_estado) VALUES ('EN_PROCESO');
-INSERT INTO estado (nombre_estado) VALUES ('COMPLETADA');
-INSERT INTO estado (nombre_estado) VALUES ('CANCELADA');
+CREATE TABLE historial (
+                       id_registro       NUMBER GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+                       fk_orden          NUMBER NOT NULL,
+                       fk_estado_anterior    NUMBER,
+                       fk_estado_nuevo         NUMBER,
+                       date_created      TIMESTAMP DEFAULT SYSTIMESTAMP NOT NULL,
+                       date_update      NOT NULL,
+                       CONSTRAINT fk_historial_orden       FOREIGN KEY (fk_orden)        REFERENCES estado (id_orden),
+                       CONSTRAINT fk_historial_estado_anterior        FOREIGN KEY (fk_estado_anterior)        REFERENCES estado (id_estado),
+                       CONSTRAINT fk_historial_estado_nuevo       FOREIGN KEY (fk_estado_nuevo)       REFERENCES cliente (id_estado),
+);
+
+
+INSERT INTO estado (nombre_estado) VALUES ('CREATED');
+INSERT INTO estado (nombre_estado) VALUES ('VALIDATED');
+INSERT INTO estado (nombre_estado) VALUES ('APPROVED');
+INSERT INTO estado (nombre_estado) VALUES ('IN_PROGRESS');
+INSERT INTO estado (nombre_estado) VALUES ('COMPLETED');
+INSERT INTO estado (nombre_estado) VALUES ('CANCELLED');
 
 INSERT INTO cliente (numero_iden, nombre_titular, direccion, telefono, fk_estado)
 VALUES ('1234567890101', 'Cliente de Prueba', 'Zona 1, Guatemala', '50255551234', 1);
@@ -70,5 +83,8 @@ VALUES ('INTERNET', 1);
 
 INSERT INTO orden (fk_estado, fk_cliente, fk_tecnico, fk_tipo_servicio)
 VALUES (2, 1, 1, 1);
+
+INSERT INTO historial (fk_orden, fk_estado_anterior, fk_estado_nuevo)
+VALUES (1, null, 2)
 
 COMMIT;
